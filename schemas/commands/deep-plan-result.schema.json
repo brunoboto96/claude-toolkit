@@ -1,0 +1,742 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/webuild-ai/claude-toolkit/schemas/deep-plan-result.json",
+  "title": "Deep Plan Result",
+  "description": "Result format for deep-plan command - comprehensive implementation planning with document analysis, gap identification, and cross-layer mapping",
+  "type": "object",
+  "properties": {
+    "taskName": {
+      "type": "string",
+      "description": "Name of the task being planned"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ready_for_implementation", "needs_clarification", "blocked"],
+      "description": "Overall readiness status of the plan"
+    },
+    "confidenceLevel": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "description": "Confidence in plan completeness"
+    },
+    "executiveSummary": {
+      "type": "string",
+      "description": "Brief overview of what will be implemented"
+    },
+    "scopeSummary": {
+      "type": "object",
+      "properties": {
+        "database": {
+          "type": "string"
+        },
+        "backend": {
+          "type": "string"
+        },
+        "frontend": {
+          "type": "string"
+        },
+        "integration": {
+          "type": "string"
+        },
+        "configuration": {
+          "type": "string"
+        }
+      }
+    },
+    "documentAnalysis": {
+      "type": "object",
+      "properties": {
+        "documentsAnalyzed": {
+          "type": "integer",
+          "description": "Total number of documents analyzed"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["specification", "requirements", "design", "existing_code", "configuration", "schema"]
+              },
+              "keyRequirementsCount": {
+                "type": "integer"
+              },
+              "gapsFound": {
+                "type": "integer"
+              },
+              "readPasses": {
+                "type": "integer",
+                "description": "Number of reading passes performed"
+              }
+            },
+            "required": ["name", "path", "keyRequirementsCount"]
+          }
+        }
+      },
+      "required": ["documentsAnalyzed", "documents"]
+    },
+    "gapAnalysis": {
+      "type": "object",
+      "properties": {
+        "totalGaps": {
+          "type": "integer"
+        },
+        "criticalGaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "impact": {
+                "type": "string"
+              },
+              "blocking": {
+                "type": "boolean"
+              },
+              "suggestedResolution": {
+                "type": "string"
+              }
+            },
+            "required": ["description", "impact", "blocking"]
+          }
+        },
+        "importantGaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "impact": {
+                "type": "string"
+              },
+              "suggestedDefault": {
+                "type": "string"
+              }
+            },
+            "required": ["description"]
+          }
+        },
+        "minorGaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "assumption": {
+                "type": "string"
+              }
+            },
+            "required": ["description", "assumption"]
+          }
+        },
+        "layerGaps": {
+          "type": "object",
+          "properties": {
+            "database": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "backend": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "frontend": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "integration": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": ["totalGaps", "criticalGaps"]
+    },
+    "complementDocuments": {
+      "type": "array",
+      "description": "Generated supplement documents to fill gaps",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Document name with _complement suffix"
+          },
+          "sourceDocument": {
+            "type": "string",
+            "description": "Original document this complements"
+          },
+          "path": {
+            "type": "string",
+            "description": "Where the complement was generated"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "gapsAddressed": {
+            "type": "integer"
+          },
+          "questionsRaised": {
+            "type": "integer"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": ["name", "sourceDocument", "purpose", "gapsAddressed"]
+      }
+    },
+    "crossLayerMapping": {
+      "type": "object",
+      "properties": {
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "requirement": {
+                "type": "string"
+              },
+              "database": {
+                "type": "object",
+                "properties": {
+                  "needed": {
+                    "type": "boolean"
+                  },
+                  "tables": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "migrations": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "backend": {
+                "type": "object",
+                "properties": {
+                  "needed": {
+                    "type": "boolean"
+                  },
+                  "endpoints": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "services": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "frontend": {
+                "type": "object",
+                "properties": {
+                  "needed": {
+                    "type": "boolean"
+                  },
+                  "pages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "components": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "navigation": {
+                    "type": "object",
+                    "description": "How users access this feature - NO orphaned pages",
+                    "properties": {
+                      "entryPoint": {
+                        "type": "string",
+                        "description": "Primary way users reach this feature (sidebar, header nav, dashboard card, link from parent)"
+                      },
+                      "menuLocation": {
+                        "type": "string",
+                        "description": "Where in the navigation hierarchy"
+                      },
+                      "linkedFrom": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Pages/components that link to this feature"
+                      }
+                    },
+                    "required": ["entryPoint"]
+                  }
+                }
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "needed": {
+                    "type": "boolean"
+                  },
+                  "envVars": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "featureFlags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "required": ["requirement"]
+          }
+        },
+        "fileLocations": {
+          "type": "object",
+          "properties": {
+            "database": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "type": "string"
+                  },
+                  "lineNumber": {
+                    "type": "integer"
+                  }
+                },
+                "required": ["file", "purpose"]
+              }
+            },
+            "backend": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "type": "string"
+                  },
+                  "lineNumber": {
+                    "type": "integer"
+                  }
+                },
+                "required": ["file", "purpose"]
+              }
+            },
+            "frontend": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "type": "string"
+                  },
+                  "lineNumber": {
+                    "type": "integer"
+                  }
+                },
+                "required": ["file", "purpose"]
+              }
+            },
+            "configuration": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "type": "string"
+                  }
+                },
+                "required": ["file", "purpose"]
+              }
+            }
+          }
+        },
+        "dependencyGraph": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "task": {
+                "type": "string"
+              },
+              "dependsOn": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "order": {
+                "type": "integer"
+              }
+            },
+            "required": ["task", "order"]
+          }
+        }
+      }
+    },
+    "probingQuestions": {
+      "type": "object",
+      "properties": {
+        "critical": {
+          "type": "array",
+          "description": "Questions that block implementation",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "whyItMatters": {
+                "type": "string"
+              },
+              "riskIfNotAnswered": {
+                "type": "string"
+              },
+              "suggestedDefault": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string",
+                "enum": ["data", "security", "performance", "integration", "ux", "operations", "compliance"]
+              }
+            },
+            "required": ["question", "whyItMatters", "category"]
+          }
+        },
+        "important": {
+          "type": "array",
+          "description": "Questions that affect quality",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "whyItMatters": {
+                "type": "string"
+              },
+              "suggestedDefault": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              }
+            },
+            "required": ["question", "category"]
+          }
+        },
+        "niceToKnow": {
+          "type": "array",
+          "description": "Questions for optimization",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "benefit": {
+                "type": "string"
+              }
+            },
+            "required": ["question"]
+          }
+        }
+      },
+      "required": ["critical"]
+    },
+    "recommendations": {
+      "type": "object",
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "description": "Recommended patterns based on codebase",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "usedIn": {
+                "type": "string",
+                "description": "File path where pattern is used"
+              },
+              "applyTo": {
+                "type": "string"
+              },
+              "benefit": {
+                "type": "string"
+              }
+            },
+            "required": ["name", "benefit"]
+          }
+        },
+        "antiPatterns": {
+          "type": "array",
+          "description": "Patterns to avoid",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "seenIn": {
+                "type": "string"
+              },
+              "issue": {
+                "type": "string"
+              },
+              "betterApproach": {
+                "type": "string"
+              }
+            },
+            "required": ["name", "issue", "betterApproach"]
+          }
+        },
+        "improvements": {
+          "type": "array",
+          "description": "Suggested improvements beyond requirements",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string",
+                "enum": ["architecture", "performance", "security", "ux", "maintainability", "testing"]
+              },
+              "suggestion": {
+                "type": "string"
+              },
+              "rationale": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["high", "medium", "low"]
+              }
+            },
+            "required": ["category", "suggestion", "rationale"]
+          }
+        }
+      }
+    },
+    "riskAssessment": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "risk": {
+            "type": "string"
+          },
+          "likelihood": {
+            "type": "string",
+            "enum": ["high", "medium", "low"]
+          },
+          "impact": {
+            "type": "string",
+            "enum": ["high", "medium", "low"]
+          },
+          "mitigation": {
+            "type": "string"
+          }
+        },
+        "required": ["risk", "likelihood", "impact", "mitigation"]
+      }
+    },
+    "implementationBlueprint": {
+      "type": "object",
+      "properties": {
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": ["database", "backend", "frontend", "integration", "testing", "documentation"]
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Task identifier like DB-1, BE-2, FE-3"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "file": {
+                      "type": "string",
+                      "description": "Target file path"
+                    },
+                    "lineNumber": {
+                      "type": "integer"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object",
+                      "description": "Task-specific details (fields, methods, endpoints, etc.)"
+                    },
+                    "verification": {
+                      "type": "string"
+                    },
+                    "dependsOn": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": ["id", "title", "file", "description"]
+                }
+              }
+            },
+            "required": ["name", "tasks"]
+          }
+        },
+        "totalTasks": {
+          "type": "integer"
+        }
+      },
+      "required": ["layers", "totalTasks"]
+    },
+    "verificationChecklist": {
+      "type": "object",
+      "properties": {
+        "preImplementation": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postImplementation": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["preImplementation", "postImplementation"]
+    },
+    "rollbackPlan": {
+      "type": "object",
+      "properties": {
+        "deploymentFailure": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "databaseRollback": {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "dataRestoration": {
+              "type": "string"
+            }
+          }
+        },
+        "featureDisable": {
+          "type": "object",
+          "properties": {
+            "flagName": {
+              "type": "string"
+            },
+            "setValue": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": ["deploymentFailure"]
+    },
+    "nextSteps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          }
+        },
+        "required": ["step", "priority"]
+      }
+    }
+  },
+  "required": [
+    "taskName",
+    "status",
+    "confidenceLevel",
+    "documentAnalysis",
+    "gapAnalysis",
+    "crossLayerMapping",
+    "probingQuestions",
+    "implementationBlueprint",
+    "verificationChecklist",
+    "rollbackPlan",
+    "nextSteps"
+  ]
+}
